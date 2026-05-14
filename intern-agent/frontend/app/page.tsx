@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import ImageRecognizer from "./components/ImageRecognizer";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "";
 
 interface Task {
   id: string;
@@ -102,9 +101,7 @@ export default function Home() {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/logs`, {
-        headers: { Authorization: `Bearer ${API_KEY}` },
-      });
+      const res = await fetch(`${API_BASE}/logs`);
       if (!res.ok) throw new Error("获取记录失败");
       const data = await res.json();
       setLogs(data);
@@ -117,9 +114,7 @@ export default function Home() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/logs/stats/summary`, {
-        headers: { Authorization: `Bearer ${API_KEY}` },
-      });
+      const res = await fetch(`${API_BASE}/logs/stats/summary`);
       if (!res.ok) throw new Error("获取统计失败");
       const data = await res.json();
       setStats(data);
@@ -232,7 +227,7 @@ export default function Home() {
     try {
       const res = await fetch(`${API_BASE}/logs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("提交失败");
@@ -256,7 +251,6 @@ export default function Home() {
     try {
       const res = await fetch(`${API_BASE}/logs/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${API_KEY}` },
       });
       if (!res.ok) throw new Error("删除失败");
       await fetchLogs();
@@ -296,7 +290,7 @@ export default function Home() {
     try {
       const res = await fetch(`${API_BASE}/logs/${logId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("更新失败");

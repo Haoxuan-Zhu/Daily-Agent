@@ -25,12 +25,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from auth import verify_api_key
 from db import init_db, get_db, DailyLog
 from schemas import DailyLogCreate, DailyLogResponse, LogUpdate
 from agent import generate_summary, suggest_tags, recognize_image
 
-# 配置日志
+# 配置日志 - 过滤 urllib3 的 OpenSSL 警告
+logging.getLogger("urllib3").setLevel(logging.ERROR)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -44,7 +44,7 @@ try:
     redis_client.ping()
     logger.info("Redis 连接成功")
 except Exception as e:
-    logger.warning(f"Redis 连接失败，限流将使用内存存储: {e}")
+    # Redis 连接失败时使用内存存储，不显示警告
     redis_client = None
 
 # 限流配置
@@ -73,12 +73,6 @@ app = FastAPI(
     - AI 自动生成学习摘要
     - 智能标签推荐
     - 图片内容识别
-    
-    ## 认证
-    所有 API 请求需要在 Header 中携带 API Key：
-    ```
-    Authorization: Bearer YOUR_API_KEY
-    ```
     """,
     version="1.0.0",
     lifespan=lifespan
@@ -95,7 +89,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Content-Type"],
 )
 
 
@@ -192,8 +186,7 @@ class ImageRecognizeRequest(BaseModel):
 def create_log(
     request: Request,
     log_data: DailyLogCreate,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     创建每日学习记录
@@ -255,8 +248,7 @@ def get_logs(
     request: Request,
     skip: int = Query(0, ge=0, description="跳过的记录数"),
     limit: int = Query(30, ge=1, le=100, description="返回的记录数"),
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     获取学习记录列表
@@ -281,8 +273,7 @@ def get_logs(
 def get_log(
     request: Request,
     log_id: str,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     获取单条学习记录
@@ -315,8 +306,7 @@ def update_log(
     request: Request,
     log_id: str,
     update_data: LogUpdate,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     更新学习记录
@@ -367,8 +357,7 @@ def update_log(
 def delete_log(
     request: Request,
     log_id: str,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     删除学习记录
@@ -405,8 +394,7 @@ def delete_log(
 @limiter.limit("10/minute")
 def get_stats_summary(
     request: Request,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(verify_api_key)
+    db: Session = Depends(get_db)
 ):
     """
     获取统计摘要
@@ -442,8 +430,7 @@ def get_stats_summary(
 @limiter.limit("5/minute")
 def recognize_image_endpoint(
     request: Request,
-    data: ImageRecognizeRequest,
-    api_key: str = Depends(verify_api_key)
+    data: ImageRecognizeRequest
 ):
     """
     使用 GLM-4V 智能分析图片内容

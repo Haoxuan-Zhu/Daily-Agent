@@ -31,7 +31,7 @@ class Learning(BaseModel):
     """学习内容模型"""
     id: str = Field(..., min_length=1, max_length=100, description="学习记录 ID")
     content: str = Field(..., min_length=1, max_length=2000, description="学习内容")
-    category: str = Field("tech", pattern="^(tech|business|tool|soft_skill)$", description="内容分类")
+    category: str = Field("tech", min_length=1, max_length=50, description="内容分类")
     keywords: List[str] = Field(default_factory=list, max_length=10, description="关键词列表")
     source: Optional[str] = Field(None, max_length=500, description="学习来源")
 

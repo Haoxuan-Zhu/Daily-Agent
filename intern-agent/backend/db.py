@@ -19,10 +19,11 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # 数据库配置
-DATABASE_URL = os.getenv(
+_DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "mysql+pymysql://root:password@localhost:3306/intern_agent"
 )
+DATABASE_URL = _DATABASE_URL if _DATABASE_URL.strip() else "sqlite:///./intern_agent.db"
 
 # 连接池配置
 POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "5"))
