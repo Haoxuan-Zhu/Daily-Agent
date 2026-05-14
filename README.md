@@ -17,6 +17,7 @@
 - [FastAPI](https://fastapi.tiangolo.com/) 0.115.0 - Web 框架
 - [SQLAlchemy](https://www.sqlalchemy.org/) 2.0.35 - ORM
 - [Pydantic](https://docs.pydantic.dev/) 2.9.2 - 数据验证
+- [MySQL](https://www.mysql.com/) + PyMySQL - 数据库
 - [GLM-4](https://open.bigmodel.cn/) - AI 大模型 API
 - 可选 [Redis](https://redis.io/) - 限流存储
 
